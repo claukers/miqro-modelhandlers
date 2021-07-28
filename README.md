@@ -3,12 +3,11 @@
 this module provides some transformation for sequelize calls and AuditHandler.
 
 
-```javascript
-...
-const {parseOptions} = require("@miqro/core");
-const {getWhereOptions, GROUP, ORDER, PAGINATION, GROUP} = require("@miqro/modelhandlers");
-...
-const {limit, offset, group, q, columns} = parseOptions("query", req.query, {
+```typescript
+import { parse } from "@miqro/core";
+import { getWhereOptions, GROUP, ORDER, PAGINATION, GROUP } from "@miqro/modelhandlers";
+
+const {limit, offset, group, q, columns} = parse("query", req.query, {
   ...ORDER(["createdAt", "id"]),
   ...GROUP(["status"]),
   ...SEARCH(["id"]),
@@ -18,7 +17,7 @@ const {limit, offset, group, q, columns} = parseOptions("query", req.query, {
   })
 } , "no_extra");
 const {order} = req.query.order ? parseOrder(req.query.order) : undefined;
-...
+
 modelA.findAndCountAll({
   where: getWhereOptions({
     q, columns,
@@ -31,5 +30,13 @@ modelA.findAndCountAll({
   group,
   order
 })
-...
+```
+
+#### AuditHandler
+
+```typescript
+import { AuditHandler, AuditErrorHandler } from "@miqro/modelhandlers";
+
+app.use(AuditHandler("audit", sequelize, getLogger("AuditHandler")));
+app.catch(AuditErrorHandler());
 ```
