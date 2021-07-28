@@ -101,12 +101,12 @@ export const getLikeSearch = ({ q, columns }: { q: string; columns: string[]; })
   const searchParams: WhereOptions[] = [];
 
   if (q !== undefined && columns !== undefined && q !== "") {
-    const qSplit = q.split(" ").map(s=>String(s).trim().toLowerCase());
-    for(const qW of qSplit) {
+    const qSplit = q.split(" ").map(s => String(s).trim().toLowerCase());
+    for (const qW of qSplit) {
       searchParams.push(SequelizeWhere(
-        SequelizeFn('lower', SequelizeLiteral(columns.map(c=>`"${c}"`).join(" || ") )), {
-          [SequelizeOp.like]: "%" + qW + "%"
-        }
+        SequelizeFn('lower', SequelizeLiteral(columns.map(c => `"${c}"`).join(" || "))), {
+        [SequelizeOp.like]: "%" + qW + "%"
+      }
       ));
     }
   }
