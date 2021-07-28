@@ -51,12 +51,14 @@ const auditLog = async (auditModel: ModelCtor<Model<any>>, ctx: Context, e?: Err
   }, transaction ? { transaction } : undefined);
 };
 
-export const AuditHandler = (auditModelName = "audit", sequelize: Sequelize, logger: Logger): Handler => {
+export const AuditHandler = (auditModelName = "audit", sequelize: Sequelize, logger?: Logger): Handler => {
   const auditModel = AuditModel(auditModelName, sequelize);
   auditModel.sync({
     force: false
   }).catch((e) => {
-    logger.error(e);
+    if (logger) {
+      logger.error(e);
+    }
   });
   return async (ctx: Context): Promise<true> => {
     const originalReq = {
