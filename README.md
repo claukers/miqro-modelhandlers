@@ -37,6 +37,7 @@ modelA.findAndCountAll({
 ```typescript
 import { AuditHandler, AuditErrorHandler } from "@miqro/modelhandlers";
 
-app.use(AuditHandler("audit", sequelize, getLogger("AuditHandler")));
+app.use(AuditHandler());
+//app.use(AuditHandler("audit", sequelize, getLogger("AuditHandler")));
 app.catch(AuditErrorHandler());
 ```
