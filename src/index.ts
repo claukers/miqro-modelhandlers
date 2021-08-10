@@ -1,4 +1,4 @@
-import { ParseOption, ParseOptionMap, parseOptionMap2ParseOptionList, parseOptions, ParseOptionsError, SimpleMap } from "@miqro/core";
+import { ParseOption, ParseOptionMap, parse, ParseOptionsError, SimpleMap } from "@miqro/core";
 import {
   Op as SequelizeOp,
   fn as SequelizeFn,
@@ -10,6 +10,24 @@ import {
   OrderItem,
   where as SequelizeWhere,
 } from "sequelize";
+
+const parseOptionMap2ParseOptionList = (map: ParseOptionMap): ParseOption[] => {
+  return Object.keys(map).map(name => {
+    const val = map[name];
+    return typeof val !== "object" ? {
+      name,
+      required: true,
+      type: val
+    } : val.required === undefined ? {
+      ...val,
+      required: true,
+      name
+    } : {
+      ...val,
+      name
+    };
+  });
+}
 
 // ?group=name&group=bla
 export const GROUP = (groupColumns: string[]): ParseOptionMap => {
@@ -159,7 +177,7 @@ export const parseAttributes = (attributes: string[]): FindAttributeOptions => {
         throw new ParseOptionsError(`query.attributes [${att}] not valid!`);
       }
       const [fnName, col, name] = fn;
-      parseOptions(`query.attributes`, { fn: fnName, col, name }, [
+      parse(`query.attributes`, { fn: fnName, col, name }, [
         { name: "fn", type: "enum", enumValues: ["sum"], required: true },
         { name: "col", type: "string", required: true },
         { name: "name", type: "string", required: true }
