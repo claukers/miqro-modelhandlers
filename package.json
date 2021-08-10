@@ -20,8 +20,8 @@
   "author": "claukers",
   "license": "ISC",
   "dependencies": {
-    "@miqro/core": "https://github.com/claukers/miqro-core.git#develop",
-    "@miqro/database": "^1.0.13",
+    "@miqro/core": "^1.1.19",
+    "@miqro/database": "^1.0.15",
     "sequelize": "^6.6.5"
   },
   "devDependencies": {
