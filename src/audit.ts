@@ -38,7 +38,7 @@ const auditLog = async (auditModel: ModelCtor<Model<any>>, ctx: Context, e?: Err
     username: ctx && ctx.session ? ctx.session.username : undefined,
     groups: ctx && ctx.session ? ctx.session.groups : undefined,
     account: ctx && ctx.session ? ctx.session.account : undefined,
-    url: ctx ? ctx.url : undefined,
+    url: ctx && ctx.url ? ctx.url.toString() : undefined,
     method: ctx ? ctx.method : undefined,
     uuid: ctx ? ctx.uuid : undefined,
     took: ctx ? (ctx as any).auditTook : undefined,
