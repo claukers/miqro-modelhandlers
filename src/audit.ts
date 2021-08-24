@@ -1,5 +1,47 @@
-import { ErrorHandler, Handler, Context, Logger } from "@miqro/core";
+import { ErrorHandler, Handler, Context, Logger, ConfigPathResolver, ConfigFileNotFoundError, parse, getLogger } from "@miqro/core";
 import { DataTypes, Model, ModelCtor, Sequelize, Transaction } from "sequelize";
+import { existsSync } from "fs";
+
+
+interface SequelizeRC {
+  // noinspection SpellCheckingInspection
+  config: string;
+  "migrations-path": string;
+  "seeders-path": string;
+  "models-path": string;
+}
+
+const loadSequelizeRC = (sequelizercPath: string = ConfigPathResolver.getSequelizeRCFilePath(), logger?: Logger): SequelizeRC => {
+  // noinspection SpellCheckingInspection
+  if (!existsSync(sequelizercPath)) {
+    // noinspection SpellCheckingInspection
+    throw new ConfigFileNotFoundError(`missing .sequelizerc file. maybe you didnt init your db config.`);
+  } else {
+    if (logger) {
+      logger.debug(`loading sequelize config from [${sequelizercPath}]`);
+    }
+    // noinspection SpellCheckingInspection
+    /* eslint-disable  @typescript-eslint/no-var-requires */
+    const sequelizerc: SequelizeRC = require(sequelizercPath);
+    return parse(sequelizercPath, sequelizerc, [
+      { name: "config", type: "string", required: true },
+      { name: "migrations-path", type: "string", required: true },
+      { name: "seeders-path", type: "string", required: true },
+      { name: "models-path", type: "string", required: true }
+    ], "no_extra") as SequelizeRC;
+  }
+};
+
+const loadSequelize = (args?: { "models-path": string }, l?: Logger): Sequelize => {
+  const logger = l ? l : getLogger("Database");
+  const sequelizerc = args ? args : loadSequelizeRC();
+  const { sequelize } = require(sequelizerc["models-path"]);
+  sequelize.log = (text: string): void => {
+    logger.info(text);
+  };
+  return sequelize as Sequelize;
+}
+
 
 const AuditModel = (auditModelName: string, sequelize: Sequelize): ModelCtor<Model<any>> => {
   return sequelize.define(auditModelName, {
@@ -51,7 +93,8 @@ const auditLog = async (auditModel: ModelCtor<Model<any>>, ctx: Context, e?: Err
   }, transaction ? { transaction } : undefined);
 };
 
-export const AuditHandler = (auditModelName = "audit", sequelize: Sequelize, logger?: Logger): Handler => {
+export const AuditHandler = (auditModelName = "audit", sequelize?: Sequelize, logger?: Logger): Handler => {
+  sequelize = sequelize ? sequelize : loadSequelize();
   const auditModel = AuditModel(auditModelName, sequelize);
   auditModel.sync({
     force: false
